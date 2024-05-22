@@ -17,13 +17,23 @@ class Glove(object):
         Dimension of GloVe embeddings
     """
 
-    def __init__(self,spacy_nlp = None, word_dict = dict(), path = None) -> None:
-        self.embeddings = word_dict
-        self.dim = self.__get_dim()
-        self.path = path
+    def __init__(self,text=None, spacy_nlp = None, path = None) -> None:
         self.spacy_nlp = spacy_nlp
+        self.embeddings = None
+        self.dim = None
+        
+        if spacy_nlp and text: 
+            self.embeddings = self.__make_glove(text)
+            self.spacy_nlp = spacy_nlp
+            self.dim = self.__get_dim()
+            
+        if path:
+            self.embeddings = self.__read_glove(path)
+            self.dim = self.__get_dim()
 
-    def read_glove(self) -> Dict[str, np.float64]:
+        
+        
+    def __read_glove(self,path) -> Dict[str, np.float64]:
         """Reads GloVe vectors into a dictionary, where
            the words are the keys, and the vectors are the values.
            
@@ -34,7 +44,7 @@ class Glove(object):
         -------
         word_vectors : Dict[str, np.float64]
         """
-        with open(self.path, 'r') as f:
+        with open(path, 'r') as f:
             data = f.readlines()
         word_vectors = {}
         for row in data:
@@ -45,9 +55,9 @@ class Glove(object):
             for el in split_row[1:]:
                 vector.append(float(el))
             word_vectors[word] = np.array(vector)
-        self.embeddings = word_vectors
+        return word_vectors
     
-    def make_glove(self,text) -> Dict[str,np.float64]:
+    def __make_glove(self,text) -> Dict[str,np.float64]:
         """Reads spacy generated nlp object, then creates a word dictionary.
         
 
@@ -55,9 +65,10 @@ class Glove(object):
             word_vectors : Dict[str,np.float64]
         """
         doc = self.spacy_nlp(text)
+        word_dict = dict()
         for token in doc:
-            self.embeddings[token.text] = token.vector
-        
+            word_dict[token.text] = token.vector
+        return word_dict
 
     def __get_dim(self) -> int:
         return len(self.embeddings[list(self.embeddings.keys())[0]])

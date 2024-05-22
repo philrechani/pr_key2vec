@@ -1,18 +1,18 @@
 import key2vec
+import spacy
 
-from tkinter import Tk
-from tkinter import filedialog
+MODEL = "en_core_web_md"
+try:
+    nlp = spacy.load(MODEL)
+except:
+    spacy.cli.download(MODEL)
+    nlp = spacy.load(MODEL)
 
-root = Tk()
-root.withdraw()
 
-
-#filepath to AI prompt input
-glove_path = filedialog.askopenfilename(title="locate glove.6B.xd.txt (x should be a number)")
-
-glove = key2vec.glove.Glove(path = glove_path)
 with open('./test.txt', 'r') as f:
     test = f.read()
+    
+glove = key2vec.glove.Glove(spacy_nlp=nlp,text = test)
 m = key2vec.key2vec.Key2Vec(test, glove)
 m.extract_candidates()
 m.set_theme_weights()
