@@ -1,7 +1,7 @@
 import numpy as np
 import spacy
 import string
-import en_core_web_sm
+#import en_core_web_sm
 import os
 
 from nltk import sent_tokenize, wordpunct_tokenize
@@ -12,8 +12,13 @@ from .docs import Document, Phrase
 from .glove import Glove
 from .phrase_graph import PhraseNode, PhraseGraph
 
-NLP = en_core_web_sm.load()
-
+spacy_model = "en_core_web_lg"   
+try:
+    spacy_nlp = spacy.load(spacy_model)
+except:
+    spacy.cli.download(spacy_model)
+    spacy_nlp = spacy.load(spacy_model)
+NLP = spacy_nlp
 class Key2Vec(object):
     """Implementation of Key2Vec.
 
