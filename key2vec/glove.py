@@ -17,19 +17,24 @@ class Glove(object):
         Dimension of GloVe embeddings
     """
 
-    def __init__(self, path: str) -> None:
-        self.embeddings = self.__read_glove(path)
+    def __init__(self,spacy_nlp = None, word_dict = dict(), path = None) -> None:
+        self.embeddings = word_dict
         self.dim = self.__get_dim()
+        self.path = path
+        self.spacy_nlp = spacy_nlp
 
-    def __read_glove(self, path: str) -> Dict[str, np.float64]:
+    def read_glove(self) -> Dict[str, np.float64]:
         """Reads GloVe vectors into a dictionary, where
            the words are the keys, and the vectors are the values.
+           
+           self.path should be set to the location of glove.6B.xd.txt, if you have it.
+           Otherwise, use __set_embeddings using the nlp object from spacy.load
 
         Returns
         -------
         word_vectors : Dict[str, np.float64]
         """
-        with open(path, 'r') as f:
+        with open(self.path, 'r') as f:
             data = f.readlines()
         word_vectors = {}
         for row in data:
@@ -40,7 +45,19 @@ class Glove(object):
             for el in split_row[1:]:
                 vector.append(float(el))
             word_vectors[word] = np.array(vector)
-        return word_vectors
+        self.embeddings = word_vectors
+    
+    def make_glove(self,text) -> Dict[str,np.float64]:
+        """Reads spacy generated nlp object, then creates a word dictionary.
+        
+
+        Returns:
+            word_vectors : Dict[str,np.float64]
+        """
+        doc = self.spacy_nlp(text)
+        for token in doc:
+            self.embeddings[token.text] = token.vector
+        
 
     def __get_dim(self) -> int:
         return len(self.embeddings[list(self.embeddings.keys())[0]])
