@@ -10,6 +10,12 @@ root.withdraw()
 
 #filepath to AI prompt input
 glove_path = filedialog.askopenfilename(title="locate glove.6B.xd.txt (x should be a number)")
+spacy_model = "en_core_web_lg"   
+try:
+    spacy_nlp = spacy.load(spacy_model)
+except:
+    spacy.cli.download(spacy_model)
+    spacy_nlp = spacy.load(spacy_model)
 
 
 glove = key2vec.glove.Glove(path = glove_path)

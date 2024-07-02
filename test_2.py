@@ -9,11 +9,11 @@ except:
     nlp = spacy.load(MODEL)
 
 
-with open('./test.txt', 'r') as f:
+with open('C:\\Users\\crossfire234\\Desktop\\WorkStuff\\BCAMP\\AiShields\\NLP\\fork-key2vec\\key2vec\\key2vec\\test.txt', 'r') as f:
     test = f.read()
     
 glove = key2vec.glove.Glove(spacy_nlp=nlp,text = test)
-m = key2vec.key2vec.Key2Vec(test, glove)
+m = key2vec.key2vec.Key2Vec(test, glove,spacy_nlp = nlp)
 m.extract_candidates()
 m.set_theme_weights()
 m.build_candidate_graph()

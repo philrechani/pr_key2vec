@@ -12,13 +12,14 @@ from .docs import Document, Phrase
 from .glove import Glove
 from .phrase_graph import PhraseNode, PhraseGraph
 
-spacy_model = "en_core_web_lg"   
+""" spacy_model = "en_core_web_lg"   
 try:
     spacy_nlp = spacy.load(spacy_model)
 except:
     spacy.cli.download(spacy_model)
     spacy_nlp = spacy.load(spacy_model)
-NLP = spacy_nlp
+NLP = spacy_nlp """
+
 class Key2Vec(object):
     """Implementation of Key2Vec.
 
@@ -42,12 +43,22 @@ class Key2Vec(object):
 
     def __init__(self,
         text: str,
-        glove: Glove) -> None:
+        glove: Glove,
+        spacy_nlp = None) -> None:
         
         self.doc = Document(text, glove)
         self.glove = glove
         self.candidates = []
         self.candidate_graph = None
+        if spacy_nlp:
+            self.NLP = spacy_nlp
+        else:
+            spacy_model = "en_core_web_lg"   
+            try:
+                self.NLP = spacy.load(spacy_model)
+            except:
+                spacy.cli.download(spacy_model)
+                self.NLP = spacy.load(spacy_model)
 
     def extract_candidates(self):
         """Extracts candidate phrases from the text. Sets
@@ -57,7 +68,7 @@ class Key2Vec(object):
         sentences = sent_tokenize(self.doc.text)
         candidates = {}
         for sentence in sentences:
-            doc = NLP(sentence)
+            doc = self.NLP(sentence)
             candidates = self.__extract_tokens(doc, candidates)
             candidates = self.__extract_entities(doc, candidates)
             candidates = self.__extract_noun_chunks(doc, candidates)
