@@ -46,9 +46,7 @@ class Key2Vec(object):
         text: str,
         glove: Optional[Glove] = None,
         spacy_nlp = None) -> None:
-        
-        
-        
+
         self.candidates = []
         self.candidate_graph = None
         if spacy_nlp:
@@ -95,7 +93,7 @@ class Key2Vec(object):
                     candidates[text] = Phrase(text, self.doc, 
                         self.glove)
                 except KeyError:
-                    next
+                    continue
             else:
                 pass
         return candidates
@@ -111,7 +109,7 @@ class Key2Vec(object):
                     candidates[cleaned_text] = Phrase(cleaned_text, self.doc,
                         self.glove)
                 except KeyError:
-                    next
+                    continue
         return candidates
 
     def __extract_noun_chunks(self, doc, candidates):
@@ -123,7 +121,7 @@ class Key2Vec(object):
                     candidates[cleaned_text] = Phrase(cleaned_text, 
                         self.doc, self.glove)
                 except KeyError:
-                    next
+                    continue
         return candidates
 
     def set_theme_weights(self) -> List[Phrase]:
