@@ -4,6 +4,7 @@ import string
 #import en_core_web_sm
 import os
 
+from typing import Optional
 from nltk import sent_tokenize, wordpunct_tokenize
 from typing import Dict, List
 from .cleaner import Cleaner
@@ -43,11 +44,11 @@ class Key2Vec(object):
 
     def __init__(self,
         text: str,
-        glove: Glove,
+        glove: Optional[Glove] = None,
         spacy_nlp = None) -> None:
         
-        self.doc = Document(text, glove)
-        self.glove = glove
+        
+        
         self.candidates = []
         self.candidate_graph = None
         if spacy_nlp:
@@ -59,6 +60,10 @@ class Key2Vec(object):
             except:
                 spacy.cli.download(spacy_model)
                 self.NLP = spacy.load(spacy_model)
+                
+        if not glove:
+            self.glove = Glove(spacy_nlp=self.NLP, text = text)
+        self.doc = Document(text, self.glove)
 
     def extract_candidates(self):
         """Extracts candidate phrases from the text. Sets
@@ -73,6 +78,7 @@ class Key2Vec(object):
             candidates = self.__extract_entities(doc, candidates)
             candidates = self.__extract_noun_chunks(doc, candidates)
         self.candidates = list(candidates.values())
+        return self.candidates
 
     def __extract_tokens(self, doc, candidates):
         for token in doc:
@@ -158,6 +164,7 @@ class Key2Vec(object):
                     candidate_graph.nodes[node].add_neighbor(
                         candidate_graph.nodes[other], nodes)
         self.candidate_graph = candidate_graph
+        return self.candidate_graph
 
     def page_rank_candidates(self, top_n: int=10) -> List[Phrase]:
         """Page Ranks candidate phrases."""
@@ -182,3 +189,10 @@ class Key2Vec(object):
             c.rank = i + 1
 
         return sorted_candidates[:top_n]
+    
+    def extract_keywords(self,top_n: int=10):
+        self.extract_candidates()
+        self.set_theme_weights()
+        self.build_candidate_graph()
+        ranked = self.page_rank_candidates(top_n=top_n)
+        return [phrase.text for phrase in ranked]
